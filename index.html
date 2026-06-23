@@ -254,8 +254,8 @@
 </head>
 <body>
 
-<audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="0.5"></audio>
-<audio id="spin-sound" src="https://assets.mixkit.co/active_storage/sfx/1932/1932-preview.mp3" preload="auto" volume="0.5"></audio>
+<audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="0.2"></audio>
+<audio id="spin-sound" src="https://assets.mixkit.co/active_storage/sfx/1932/1932-preview.mp3" preload="auto" volume="0.2"></audio>
 <audio id="tick-sound" src="碼表倒數聲.mp3" preload="auto" volume="1.0"></audio>
 <audio id="start-sound" src="彈簧聲.mp3" preload="auto" volume="1.0"></audio>
 
@@ -312,8 +312,8 @@
   const tickSound = document.getElementById('tick-sound');
   const startSound = document.getElementById('start-sound');
   
-  if (timeUpSound) timeUpSound.volume = 0.5;
-  if (spinSound) spinSound.volume = 0.5;
+  if (timeUpSound) timeUpSound.volume = 0.2;
+  if (spinSound) spinSound.volume = 0.2;
   if (startSound) startSound.volume = 1.0;
   
   // 針對碼表倒數聲的特殊設定：開啟循環，並避開 MP3 天生的前後空白停頓
@@ -365,7 +365,7 @@
 
     // 播放轉盤音效
     spinSound.currentTime = 0;
-    spinSound.volume = 0.5;
+    spinSound.volume = 0.2;
     spinSound.play().catch(e => console.log("轉盤音效播放被阻擋:", e));
 
     const resultDiv = document.getElementById('result');
@@ -475,7 +475,7 @@
         timeUpSound.pause();
         timeUpSound.currentTime = 0;
         timeUpSound.muted = false; // 真正要播放時才解除靜音
-        timeUpSound.volume = 0.5;
+        timeUpSound.volume = 0.2;
         timeUpSound.play().catch(error => {
           console.log("自動播放音效被瀏覽器阻擋:", error);
         });
