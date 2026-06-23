@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>發言順序與計時系統</title>
+<style>
+  body {
+    font-family: "Microsoft JhengHei", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f4f9;
+  }
+  .container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 350px;
+  }
+  
+  /* --- 抽籤系統樣式 --- */
+  h2 {
+    color: #333;
+    margin-top: 0;
+  }
+  #result {
+    font-size: 40px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 20px 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .direction {
+    margin-left: 15px;
+  }
+  .direction-green {
+    color: #27ae60;
+  }
+  .direction-red {
+    color: #e74c3c;
+  }
+  .number {
+    color: #3498db;
+  }
+  .arrow {
+    font-size: 50px;
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-15px); }
+    60% { transform: translateY(-7px); }
+  }
+  .draw-btn {
+    font-size: 24px;
+    padding: 12px 30px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #2c3e50;
+    color: white;
+    transition: background-color 0.2s;
+    margin-bottom: 20px;
+  }
+  .draw-btn:hover { background-color: #34495e; }
+  .draw-btn:active { transform: scale(0.98); }
+  .draw-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* --- 設定區塊樣式 --- */
+  .settings-details {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #555;
+    text-align: left;
+  }
+  .settings-details summary {
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    padding: 5px 0;
+    text-align: center;
+    font-size: 16px;
+  }
+  .settings-details[open] summary {
+    margin-bottom: 10px;
+  }
+
+  /* --- 分隔線 --- */
+  .divider {
+    border: 0;
+    height: 1px;
+    background: #e0e0e0;
+    margin: 25px 0;
+  }
+
+  /* --- 計時器樣式 --- */
+  .timer-section h2 {
+    font-size: 20px;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  .time-selector {
+    margin: 10px 0;
+    padding: 0 10px;
+  }
+  #time-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    outline: none;
+    margin-bottom: 5px;
+    transition: opacity 0.2s;
+  }
+  #time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3498db;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  #time-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3498db;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: none;
+  }
+  #time-slider:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #time-slider:disabled::-webkit-slider-thumb {
+    cursor: not-allowed;
+  }
+  .time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #7f8c8d;
+    padding: 0 2px;
+    user-select: none;
+  }
+  .time-labels span {
+    cursor: pointer;
+  }
+  #timer-display {
+    font-size: 56px;
+    font-weight: bold;
+    font-family: monospace;
+    color: #2c3e50;
+    margin: 10px 0 20px 0;
+    transition: color 0.3s;
+  }
+  #timer-display.danger {
+    color: #e74c3c;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .timer-controls button {
+    font-size: 15px;
+    padding: 10px 0;
+    flex: 1;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  .timer-controls button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  #start-btn { background-color: #3498db; }
+  #start-btn:hover { background-color: #2980b9; }
+  #add-time-30-btn, #add-time-60-btn { background-color: #f39c12; }
+  #add-time-30-btn:hover:not(:disabled), #add-time-60-btn:hover:not(:disabled) { background-color: #d68910; }
+  #add-time-30-btn:disabled, #add-time-60-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+  #reset-btn { background-color: #7f8c8d; }
+  #reset-btn:hover { background-color: #636e72; }
+
+  /* --- 紀錄區塊樣式 --- */
+  .number-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  .record-item {
+    background-color: #fff;
+    border: 2px solid #bdc3c7;
+    color: #2c3e50;
+    border-radius: 8px;
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .record-item:hover {
+    border-color: #95a5a6;
+    background-color: #f8f9fa;
+  }
+  .record-item.used {
+    background-color: #95a5a6;
+    border-color: #95a5a6;
+    color: white;
+    text-decoration: line-through;
+  }
+  .reset-record-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  .reset-record-btn:hover {
+    background-color: #c0392b;
+  }
+</style>
+</head>
+<body>
+
+<audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="0.5"></audio>
+<audio id="spin-sound" src="https://assets.mixkit.co/active_storage/sfx/1932/1932-preview.mp3" preload="auto" volume="0.5"></audio>
+<audio id="tick-sound" src="碼表倒數聲.mp3" preload="auto" volume="1.0"></audio>
+<audio id="start-sound" src="彈簧聲.mp3" preload="auto" volume="1.0"></audio>
+
+<div class="container">
+  <h2>🐺 發言順序</h2>
+  <div id="result"><div class="arrow">🔽</div></div>
+  
+  <details class="settings-details">
+    <summary>⚙️ 設定參與號碼 (點擊可排除)</summary>
+    <div id="selection-grid" class="number-grid"></div>
+  </details>
+
+  <button id="drawBtn" class="draw-btn" onclick="startDrawAnimation()">抽順序</button>
+
+  <hr class="divider">
+
+  <div class="timer-section">
+    <h2>⏳ 發言倒數</h2>
+    <div class="time-selector">
+      <input type="range" id="time-slider" min="0" max="2" value="1" step="1">
+      <div class="time-labels">
+        <span onclick="setTimeSlider(0)">1分</span>
+        <span onclick="setTimeSlider(1)">1分半</span>
+        <span onclick="setTimeSlider(2)">2分</span>
+      </div>
+    </div>
+    <div id="timer-display">01:30</div>
+    <div class="timer-controls">
+      <button id="start-btn" onclick="toggleTimer()">開始</button>
+      <button id="add-time-30-btn" onclick="addTime(30)">+30秒</button>
+      <button id="add-time-60-btn" onclick="addTime(60)">+1分鐘</button>
+      <button id="reset-btn" onclick="resetTimer()">重置</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="record-section">
+    <details class="settings-details">
+      <summary>📝 已加時號碼紀錄</summary>
+      <div id="record-grid" class="number-grid">
+        </div>
+      <div style="text-align: center;">
+        <button class="reset-record-btn" onclick="resetRecords()">清空號碼紀錄</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script>
+  // 強制所有音效在載入時音量達到設定值
+  const timeUpSound = document.getElementById('time-up-sound');
+  const spinSound = document.getElementById('spin-sound');
+  const tickSound = document.getElementById('tick-sound');
+  const startSound = document.getElementById('start-sound');
+  
+  if (timeUpSound) timeUpSound.volume = 0.5;
+  if (spinSound) spinSound.volume = 0.5;
+  if (startSound) startSound.volume = 1.0;
+  
+  // 針對碼表倒數聲的特殊設定：開啟循環，並避開 MP3 天生的前後空白停頓
+  if (tickSound) {
+    tickSound.volume = 1.0;
+    tickSound.loop = true;
+    tickSound.addEventListener('timeupdate', function() {
+      // 只要快播到結尾前 0.25 秒，就直接強制跳回開頭的 0.05 秒，形成無縫循環齒輪聲
+      if (this.duration && this.currentTime >= this.duration - 0.25) {
+        this.currentTime = 0.05; 
+      }
+    });
+  }
+
+  // 新增：全域解鎖手機音效播放權限機制
+  let audioUnlocked = false;
+  function unlockAllAudio() {
+    if (!audioUnlocked) {
+      // 只解鎖「未來 10 秒後才會響起」的音效。
+      // 注意：不能在這裡解鎖 startSound，否則會導致它在點擊開始時發生衝突被靜音！
+      const audios = [timeUpSound, tickSound];
+      audios.forEach(a => {
+        if (a) {
+          a.muted = true; // 使用 muted 靜音才能避開手機系統限制
+          const playPromise = a.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              a.pause();
+              a.currentTime = 0;
+              // ⚠️ 關鍵修正：這裡不要解除靜音，讓它維持靜音，等到真的要播的時候再解除！
+            }).catch(e => {});
+          }
+        }
+      });
+      audioUnlocked = true;
+    }
+  }
+
+  /* ================= 抽籤系統邏輯 ================= */
+  let availableNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+  function startDrawAnimation() {
+    unlockAllAudio(); // 確保抽順序時解鎖音效
+
+    if (availableNumbers.length === 0) {
+      alert('請至少保留一個參與抽順序的號碼！');
+      return;
+    }
+
+    // 播放轉盤音效
+    spinSound.currentTime = 0;
+    spinSound.volume = 0.5;
+    spinSound.play().catch(e => console.log("轉盤音效播放被阻擋:", e));
+
+    const resultDiv = document.getElementById('result');
+    const drawBtn = document.getElementById('drawBtn');
+    
+    drawBtn.disabled = true;
+    drawBtn.innerText = "抽順序中";
+    
+    let jumps = 0;
+    const maxJumps = 30; 
+    
+    const interval = setInterval(() => {
+      const tempNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+      const directions = ['順時針', '逆時針'];
+      const tempDirection = directions[Math.floor(Math.random() * 2)];
+      const tempColorClass = tempDirection === '順時針' ? 'direction-green' : 'direction-red';
+      
+      resultDiv.innerHTML = `<span class="number">${tempNumber}</span> <span class="direction ${tempColorClass}">${tempDirection}</span>`;
+      
+      jumps++;
+      
+      if (jumps >= maxJumps) {
+        clearInterval(interval);
+        
+        // 停止轉盤音效
+        spinSound.pause();
+        
+        const finalNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+        const finalDirection = directions[Math.floor(Math.random() * 2)];
+        const finalColorClass = finalDirection === '順時針' ? 'direction-green' : 'direction-red';
+        
+        resultDiv.style.opacity = 0;
+        setTimeout(() => {
+          resultDiv.innerHTML = `<span class="number">${finalNumber}</span> <span class="direction ${finalColorClass}">${finalDirection}</span>`;
+          resultDiv.style.opacity = 1;
+          resultDiv.style.transition = "opacity 0.2s ease-in";
+          
+          drawBtn.disabled = false;
+          drawBtn.innerText = "抽順序";
+        }, 100);
+      }
+    }, 50); 
+  }
+
+  /* ================= 計時器邏輯 ================= */
+  const timeOptions = [60, 90, 120]; // 1分, 1分半, 2分
+  let baseTime = timeOptions[1]; // 預設 90 秒 (1分30秒)
+  let timeLeft = baseTime; 
+  let timerInterval = null;
+  let isRunning = false;
+  let hasAddedTime = false; // 追蹤是否加過時
+  let globalAddTimeAmount = 0; // 紀錄本局全局加時長度，0代表尚未選擇
+
+  const timerDisplay = document.getElementById('timer-display');
+  const startBtn = document.getElementById('start-btn');
+  const timeSlider = document.getElementById('time-slider');
+
+  // 監聽滑桿變動
+  timeSlider.addEventListener('input', (e) => {
+    baseTime = timeOptions[e.target.value];
+    resetTimer();
+  });
+
+  // 點擊標籤可以直接跳轉滑桿
+  function setTimeSlider(index) {
+    if (timeSlider.disabled) return;
+    timeSlider.value = index;
+    baseTime = timeOptions[index];
+    resetTimer();
+  }
+
+  // 更新畫面時間顯示
+  function updateTimerDisplay() {
+    if (timeLeft <= 0) {
+      timerDisplay.innerText = "00:00";
+      timerDisplay.classList.add('danger');
+      return;
+    }
+    
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const formattedTime = 
+      String(minutes).padStart(2, '0') + ':' + 
+      String(seconds).padStart(2, '0');
+    
+    timerDisplay.innerText = formattedTime;
+    
+    if (timeLeft <= 10) {
+      timerDisplay.classList.add('danger');
+    } else {
+      timerDisplay.classList.remove('danger');
+    }
+  }
+
+  let targetPlayCount = 0;
+  let currentPlayCount = 0;
+  let audioTimeout = null;
+
+  // 播放音效函數 (控制間隔 1.2 秒雙響)
+  function playAudio(times) {
+    targetPlayCount = times;
+    currentPlayCount = 0;
+    clearTimeout(audioTimeout);
+
+    function playNext() {
+      if (currentPlayCount < targetPlayCount) {
+        timeUpSound.pause();
+        timeUpSound.currentTime = 0;
+        timeUpSound.muted = false; // 真正要播放時才解除靜音
+        timeUpSound.volume = 0.5;
+        timeUpSound.play().catch(error => {
+          console.log("自動播放音效被瀏覽器阻擋:", error);
+        });
+        currentPlayCount++;
+
+        if (currentPlayCount < targetPlayCount) {
+          audioTimeout = setTimeout(playNext, 1200); 
+        }
+      }
+    }
+
+    playNext();
+  }
+
+  // 停止音效函數
+  function stopAudio() {
+    targetPlayCount = 0;
+    clearTimeout(audioTimeout);
+    timeUpSound.pause();
+    timeUpSound.currentTime = 0;
+    
+    if (tickSound) {
+      tickSound.pause();
+      tickSound.currentTime = 0;
+    }
+    if (startSound) {
+      startSound.pause();
+      startSound.currentTime = 0;
+    }
+  }
+
+  // 開始或暫停計時
+  function toggleTimer() {
+    unlockAllAudio(); // 確保點擊按鈕時獲得手機播放權限
+
+    if (isRunning) {
+      // 執行中 -> 暫停
+      clearInterval(timerInterval);
+      startBtn.innerText = "繼續";
+      startBtn.style.backgroundColor = "#2ecc71";
+      stopAudio();
+    } else {
+      // 暫停中 -> 開始
+      if (timeLeft <= 0) return;
+      
+      timeSlider.disabled = true;
+      
+      // 開始時播放彈簧音效 (已排除干擾，可以直接順暢播放)
+      if (startSound) {
+        startSound.currentTime = 0;
+        startSound.play().catch(e => console.log("開始音效被阻擋:", e));
+      }
+
+      // 如果是在最後 10 秒內按繼續，立刻恢復碼表連續播放
+      if (timeLeft <= 10 && timeLeft > 0) {
+        tickSound.muted = false; // 真正要播放時才解除靜音
+        tickSound.play().catch(e => console.log("碼表恢復被阻擋:", e));
+      }
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        
+        // 抵達 10 秒時觸發播放，配合時間軸無縫銜接技術，不會再卡頓
+        if (timeLeft === 10) {
+          tickSound.muted = false; // 真正要播放時才解除靜音
+          tickSound.currentTime = 0;
+          tickSound.play().catch(e => console.log("倒數音效被阻擋:", e));
+        }
+        
+        // 時間到
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          isRunning = false;
+          startBtn.innerText = "時間到";
+          startBtn.disabled = true;
+          startBtn.style.backgroundColor = "#95a5a6";
+          
+          // 強制停止並重置碼表倒數聲
+          if (tickSound) {
+            tickSound.pause();
+            tickSound.currentTime = 0;
+          }
+
+          // 延遲 0.5 秒再播放「叮」的音效，確保碼錶聲已完全結束且不重疊
+          setTimeout(() => {
+            playAudio(1);
+          }, 500);
+        }
+      }, 1000);
+      
+      startBtn.innerText = "暫停";
+      startBtn.style.backgroundColor = "#e74c3c";
+    }
+    isRunning = !isRunning;
+  }
+
+  // 加時功能 (傳入30或60)
+  function addTime(amount) {
+    if (!hasAddedTime) {
+      if (globalAddTimeAmount === 0) {
+        globalAddTimeAmount = amount;
+      }
+      
+      const wasTimeUp = (timeLeft <= 0);
+      
+      if (timeLeft < 0) timeLeft = 0;
+      
+      timeLeft += globalAddTimeAmount;
+      hasAddedTime = true;
+      
+      // 如果加時後超過 10 秒，需要暫停正在播放的碼錶聲
+      if (timeLeft > 10 && tickSound) {
+        tickSound.pause();
+        tickSound.currentTime = 0;
+      }
+
+      updateTimerDisplay();
+      updateTimerControls();
+      
+      if (wasTimeUp) {
+        startBtn.disabled = false;
+        stopAudio();
+        toggleTimer();
+      }
+    }
+  }
+
+  // 更新計時器按鈕顯示狀態
+  function updateTimerControls() {
+    const btn30 = document.getElementById('add-time-30-btn');
+    const btn60 = document.getElementById('add-time-60-btn');
+    
+    if (!btn30 || !btn60) return;
+
+    if (globalAddTimeAmount === 30) {
+      btn30.style.display = '';
+      btn60.style.display = 'none';
+    } else if (globalAddTimeAmount === 60) {
+      btn30.style.display = 'none';
+      btn60.style.display = '';
+    } else {
+      btn30.style.display = '';
+      btn60.style.display = '';
+    }
+    
+    btn30.disabled = hasAddedTime;
+    btn60.disabled = hasAddedTime;
+  }
+
+  // 重置計時器
+  function resetTimer() {
+    clearInterval(timerInterval);
+    isRunning = false;
+    timeLeft = baseTime;
+    hasAddedTime = false;
+    
+    timeSlider.disabled = false;
+    
+    startBtn.innerText = "開始";
+    startBtn.disabled = false;
+    startBtn.style.backgroundColor = "#3498db";
+    
+    updateTimerDisplay();
+    updateTimerControls();
+    stopAudio();
+  }
+
+  // 網頁載入時初始化顯示時間與按鈕狀態
+  updateTimerDisplay();
+  updateTimerControls();
+
+  /* ================= 已加時紀錄邏輯 ================= */
+  const recordGrid = document.getElementById('record-grid');
+
+  function initRecordGrid() {
+    recordGrid.innerHTML = '';
+    for (let i = 1; i <= 12; i++) {
+      const btn = document.createElement('div');
+      btn.className = 'record-item';
+      btn.innerText = i;
+      btn.onclick = () => {
+        btn.classList.toggle('used');
+      };
+      recordGrid.appendChild(btn);
+    }
+  }
+
+  function resetRecords() {
+    const items = recordGrid.querySelectorAll('.record-item');
+    items.forEach(item => item.classList.remove('used'));
+    
+    globalAddTimeAmount = 0;
+    updateTimerControls();
+  }
+
+  // 初始化參與號碼設定面板
+  const selectionGrid = document.getElementById('selection-grid');
+  function initSelectionGrid() {
+    selectionGrid.innerHTML = '';
+    for (let i = 1; i <= 12; i++) {
+      const btn = document.createElement('div');
+      btn.className = 'record-item';
+      btn.innerText = i;
+      
+      btn.onclick = () => {
+        const index = availableNumbers.indexOf(i);
+        if (index !== -1) {
+          if (availableNumbers.length === 1) {
+            alert('至少要保留一個參與號碼！');
+            return;
+          }
+          availableNumbers.splice(index, 1);
+          btn.classList.add('used');
+        } else {
+          availableNumbers.push(i);
+          btn.classList.remove('used');
+        }
+        availableNumbers.sort((a, b) => a - b);
+      };
+      selectionGrid.appendChild(btn);
+    }
+  }
+
+  initRecordGrid();
+  initSelectionGrid();
+</script>
+
+</body>
+</html>
