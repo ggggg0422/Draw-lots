@@ -13,22 +13,23 @@
     justify-content: center;
     min-height: 100vh;
     margin: 0;
-    /* 背景改為單一淺藍色 (#cce5ff) 取代原本的淺紫 */
-    background-color: #cce5ff;
+    /* 背景改為由上至下越來越深的藍色漸層 */
+    background: linear-gradient(to bottom, #cce5ff, #154360);
+    background-attachment: fixed;
   }
   .container {
-    /* 面板底色改為淺藍色 */
-    background: #cce5ff;
+    /* 面板底色改為由上至下越來越深的藍色漸層 */
+    background: linear-gradient(to bottom, #cce5ff, #154360);
     padding: 30px 40px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3); /* 加深陰影讓面板浮現 */
     text-align: center;
     width: 350px;
   }
   
   /* --- 抽籤系統樣式 --- */
   h2 {
-    color: #333;
+    color: #154360; /* 上方的標題保持深色 */
     margin-top: 0;
   }
   #result {
@@ -89,7 +90,7 @@
   .settings-details {
     margin-bottom: 15px;
     font-size: 14px;
-    color: #555;
+    color: #fff; /* 文字改白 */
     text-align: left;
   }
   .settings-details summary {
@@ -99,6 +100,8 @@
     padding: 5px 0;
     text-align: center;
     font-size: 16px;
+    color: #fff; /* 文字改白 */
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* 增加陰影確保在淺色區也清楚 */
   }
   .settings-details[open] summary {
     margin-bottom: 10px;
@@ -108,14 +111,14 @@
   .divider {
     border: 0;
     height: 1px;
-    background: #e0e0e0;
+    background: rgba(255, 255, 255, 0.3); /* 分隔線改半透明白 */
     margin: 25px 0;
   }
 
   /* --- 計時器樣式 --- */
   .timer-section h2 {
     font-size: 20px;
-    color: #555;
+    color: #fff; /* 下方的標題改白色 */
     margin-bottom: 10px;
   }
   .time-selector {
@@ -164,7 +167,7 @@
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    color: #7f8c8d;
+    color: #ecf0f1; /* 時間標籤改淺色 */
     padding: 0 2px;
     user-select: none;
   }
@@ -175,18 +178,14 @@
     font-size: 56px;
     font-weight: bold;
     font-family: monospace;
-    color: #2c3e50;
+    color: #fff; /* 計時器文字改白 */
     margin: 10px 0 20px 0;
     transition: color 0.3s;
   }
   #timer-display.danger {
-    color: #e74c3c;
+    color: #ff4d4d; /* 警告紅色微調亮一點 */
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
     animation: pulse 1s infinite;
-  }
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
   }
   .timer-controls {
     display: flex;
