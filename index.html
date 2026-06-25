@@ -34,6 +34,8 @@
     font-weight: 900; /* 字體加粗 */
     margin-top: 0;
     text-shadow: none; /* 深色字在淺色背景上很清楚，移除陰影 */
+    /* 利用文字外框效果，讓字體突破 900 的極限變得更粗 */
+    -webkit-text-stroke: 1.2px #154360;
   }
   #result {
     font-size: 40px;
@@ -125,6 +127,8 @@
     color: #fff; 
     margin-bottom: 10px;
     text-shadow: 2px 2px 6px rgba(0,0,0,0.4); /* 同步加上陰影增加質感 */
+    /* 利用文字外框效果，讓字體突破 900 的極限變得更粗 */
+    -webkit-text-stroke: 1.2px #fff;
   }
   .time-selector {
     margin: 10px 0;
