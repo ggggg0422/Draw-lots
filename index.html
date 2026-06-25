@@ -29,8 +29,11 @@
   
   /* --- 抽籤系統樣式 --- */
   h2 {
-    color: #154360; /* 上方的標題保持深色 */
+    color: #154360; /* 標題改為深藍色 */
+    font-size: 32px; /* 字體加大 */
+    font-weight: 900; /* 字體加粗 */
     margin-top: 0;
+    text-shadow: none; /* 深色字在淺色背景上很清楚，移除陰影 */
   }
   #result {
     font-size: 40px;
@@ -117,9 +120,11 @@
 
   /* --- 計時器樣式 --- */
   .timer-section h2 {
-    font-size: 20px;
-    color: #fff; /* 下方的標題改白色 */
+    font-size: 32px; /* 字體加大與上方一致 */
+    font-weight: 900; /* 字體加粗 */
+    color: #fff; 
     margin-bottom: 10px;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.4); /* 同步加上陰影增加質感 */
   }
   .time-selector {
     margin: 10px 0;
@@ -274,7 +279,7 @@
   <div id="result"><div class="arrow">🔽</div></div>
   
   <details class="settings-details">
-    <summary>⚙️ 設定參與號碼 (點擊可排除)</summary>
+    <summary>⚙️ 1號~12號(點擊可排除)</summary>
     <div id="selection-grid" class="number-grid"></div>
   </details>
 
