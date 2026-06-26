@@ -95,7 +95,6 @@
   .settings-details {
     margin-bottom: 15px;
     font-size: 14px;
-    color: #fff; /* 文字改白 */
     text-align: left;
   }
   .settings-details summary {
@@ -105,8 +104,16 @@
     padding: 5px 0;
     text-align: center;
     font-size: 16px;
-    color: #fff; /* 文字改白 */
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* 增加陰影確保在淺色區也清楚 */
+  }
+  /* 上方在淺藍色背景上的文字與箭頭 */
+  .top-settings summary {
+    color: #154360; /* 文字與箭頭改為深藍色 */
+    text-shadow: none;
+  }
+  /* 下方在深藍色背景上的文字與箭頭 */
+  .bottom-settings summary {
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
   }
   .settings-details[open] summary {
     margin-bottom: 10px;
@@ -282,7 +289,7 @@
   <h2>🐺 發言順序</h2>
   <div id="result"><div class="arrow">🔽</div></div>
   
-  <details class="settings-details">
+  <details class="settings-details top-settings">
     <summary>⚙️ 1號~12號(點擊可排除)</summary>
     <div id="selection-grid" class="number-grid"></div>
   </details>
@@ -313,7 +320,7 @@
   <hr class="divider">
 
   <div class="record-section">
-    <details class="settings-details">
+    <details class="settings-details bottom-settings">
       <summary>📝 已加時號碼紀錄</summary>
       <div id="record-grid" class="number-grid">
         </div>
