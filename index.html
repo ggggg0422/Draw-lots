@@ -203,6 +203,10 @@
     text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
     animation: pulse 1s infinite;
   }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.8; }
+  }
   .timer-controls {
     display: flex;
     gap: 10px;
@@ -276,6 +280,69 @@
   .reset-record-btn:hover {
     background-color: #c0392b;
   }
+
+  /* --- 抽籤號碼：暗燈與亮燈樣式 --- */
+  .light-item {
+    background-color: rgba(21, 67, 96, 0.5); /* 暗燈底色：深暗藍 */
+    border: 2px solid #34495e;
+    color: #7f8c8d; /* 暗燈文字：暗灰色 */
+    border-radius: 8px;
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  .light-item:hover {
+    border-color: #5d6d7e;
+    color: #bdc3c7;
+  }
+  .light-item.lit {
+    background-color: #fff9db; /* 亮燈底色：暖白微黃 */
+    border-color: #f1c40f; /* 亮燈邊框：亮黃色 */
+    color: #d35400; /* 亮燈文字：深橘色，凸顯對比 */
+    box-shadow: 0 0 12px rgba(241, 196, 15, 0.9), inset 0 0 6px rgba(241, 196, 15, 0.4); /* 發光光暈 */
+    transform: scale(1.03);
+  }
+
+  /* --- 全亮燈 / 全關燈 快捷按鈕樣式 --- */
+  .light-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
+  .light-ctrl-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  .light-ctrl-btn:active {
+    transform: scale(0.96);
+  }
+  .all-on-btn {
+    background-color: #f39c12;
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.4);
+  }
+  .all-on-btn:hover {
+    background-color: #d68910;
+  }
+  .all-off-btn {
+    background-color: #34495e;
+  }
+  .all-off-btn:hover {
+    background-color: #2c3e50;
+  }
 </style>
 </head>
 <body>
@@ -289,9 +356,13 @@
   <h2>🐺 發言順序</h2>
   <div id="result"><div class="arrow">🔽</div></div>
   
-  <details class="settings-details top-settings">
-    <summary>⚙️ 1號~12號(點擊可排除)</summary>
+  <details class="settings-details top-settings" open>
+    <summary>⚙️ 1號~12號 (點擊亮燈參與)</summary>
     <div id="selection-grid" class="number-grid"></div>
+    <div class="light-controls">
+      <button type="button" class="light-ctrl-btn all-on-btn" onclick="setAllLights(true)">💡 全亮燈</button>
+      <button type="button" class="light-ctrl-btn all-off-btn" onclick="setAllLights(false)">🌑 全關燈</button>
+    </div>
   </details>
 
   <button id="drawBtn" class="draw-btn" onclick="startDrawAnimation()">抽順序</button>
@@ -323,7 +394,7 @@
     <details class="settings-details bottom-settings">
       <summary>📝 已加時號碼紀錄</summary>
       <div id="record-grid" class="number-grid">
-        </div>
+      </div>
       <div style="text-align: center;">
         <button class="reset-record-btn" onclick="resetRecords()">清空號碼紀錄</button>
       </div>
@@ -379,13 +450,13 @@
   }
 
   /* ================= 抽籤系統邏輯 ================= */
-  let availableNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  let availableNumbers = []; // 起始默認都未選取（全暗燈）
 
   function startDrawAnimation() {
     unlockAllAudio(); // 確保抽順序時解鎖音效
 
     if (availableNumbers.length === 0) {
-      alert('請至少保留一個參與抽順序的號碼！');
+      alert('請先點選（亮燈）至少一個參與抽順序的號碼！');
       return;
     }
 
@@ -699,31 +770,42 @@
     updateTimerControls();
   }
 
-  // 初始化參與號碼設定面板
+  /* ================= 參與號碼設定面板（亮燈/暗燈） ================= */
   const selectionGrid = document.getElementById('selection-grid');
+  
   function initSelectionGrid() {
     selectionGrid.innerHTML = '';
     for (let i = 1; i <= 12; i++) {
       const btn = document.createElement('div');
-      btn.className = 'record-item';
+      btn.className = 'light-item'; // 預設套用暗燈樣式
       btn.innerText = i;
       
       btn.onclick = () => {
         const index = availableNumbers.indexOf(i);
-        if (index !== -1) {
-          if (availableNumbers.length === 1) {
-            alert('至少要保留一個參與號碼！');
-            return;
-          }
-          availableNumbers.splice(index, 1);
-          btn.classList.add('used');
-        } else {
+        if (index === -1) {
+          // 原本未選取 -> 點擊後亮燈並加入抽籤池
           availableNumbers.push(i);
-          btn.classList.remove('used');
+          btn.classList.add('lit');
+        } else {
+          // 原本已選取 -> 點擊後關燈並移出抽籤池
+          availableNumbers.splice(index, 1);
+          btn.classList.remove('lit');
         }
         availableNumbers.sort((a, b) => a - b);
       };
       selectionGrid.appendChild(btn);
+    }
+  }
+
+  // 全亮燈 / 全關燈 快捷功能
+  function setAllLights(turnOn) {
+    const items = selectionGrid.querySelectorAll('.light-item');
+    if (turnOn) {
+      availableNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      items.forEach(btn => btn.classList.add('lit'));
+    } else {
+      availableNumbers = [];
+      items.forEach(btn => btn.classList.remove('lit'));
     }
   }
 
