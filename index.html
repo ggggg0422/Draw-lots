@@ -265,7 +265,9 @@
     background-color: #95a5a6;
     border-color: #95a5a6;
     color: white;
-    text-decoration: line-through;
+    /* 取消刪除線，並將中文字體稍微縮小以避免破版 */
+    text-decoration: none;
+    font-size: 15px; 
   }
   .reset-record-btn {
     background-color: #e74c3c;
@@ -757,6 +759,12 @@
       btn.innerText = i;
       btn.onclick = () => {
         btn.classList.toggle('used');
+        // 加入判斷：如果有 .used class 就顯示已加時，否則恢復原本數字
+        if (btn.classList.contains('used')) {
+          btn.innerText = "已加時";
+        } else {
+          btn.innerText = i;
+        }
       };
       recordGrid.appendChild(btn);
     }
@@ -764,7 +772,11 @@
 
   function resetRecords() {
     const items = recordGrid.querySelectorAll('.record-item');
-    items.forEach(item => item.classList.remove('used'));
+    items.forEach((item, index) => {
+      item.classList.remove('used');
+      // 清空紀錄時，把按鈕文字變回對應的號碼 (index + 1)
+      item.innerText = index + 1;
+    });
     
     globalAddTimeAmount = 0;
     updateTimerControls();
