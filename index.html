@@ -35,7 +35,6 @@
     color: var(--text-light);
   }
 
-  /* */
   .container {
     /* 質感升級：毛玻璃效果 (Glassmorphism) */
     background: var(--panel-bg);
@@ -61,7 +60,6 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
 
-  /* */
   #result-container {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 15px;
@@ -111,7 +109,6 @@
     50% { opacity: 1; }
   }
 
-  /* */
   .btn-primary {
     font-family: 'Noto Sans TC', sans-serif;
     font-size: 20px;
@@ -194,7 +191,6 @@
     margin: 30px 0;
   }
 
-  /* */
   /* --- 計時器樣式 --- */
   .time-selector {
     margin: 15px 0;
@@ -263,7 +259,6 @@
     50% { transform: scale(1.05); }
   }
   
-  /* */
   .timer-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -302,7 +297,6 @@
   #reset-btn { background: linear-gradient(135deg, #64748b, #475569); }
   #reset-btn:hover { filter: brightness(1.1); }
 
-  /* */
   /* --- 紀錄區塊與號碼燈號共用網格樣式 --- */
   .number-grid {
     display: grid;
@@ -387,7 +381,6 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* */
   /* --- 全亮燈 / 全關燈 快捷按鈕樣式 --- */
   .light-controls {
     display: flex;
@@ -427,6 +420,10 @@
 <!-- 更新為高質感的線上音效 (已移除彈簧聲與碼表聲) -->
 <audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="1.0"></audio>
 <audio id="start-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto" volume="1.0"></audio>
+<!-- 新增抽籤閃動音效 -->
+<audio id="tick-sound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto" volume="0.5"></audio>
+<!-- 新增倒數十秒滴答聲 -->
+<audio id="countdown-tick-sound" src="https://assets.mixkit.co/active_storage/sfx/2533/2533-preview.mp3" preload="auto" volume="0.7"></audio>
 
 <div class="container">
   <h2>抽發言順序</h2>
@@ -488,15 +485,19 @@
   // 強制所有音效在載入時音量達到設定值
   const timeUpSound = document.getElementById('time-up-sound');
   const startSound = document.getElementById('start-sound');
+  const tickSound = document.getElementById('tick-sound'); // 獲取閃動音效
+  const countdownTickSound = document.getElementById('countdown-tick-sound'); // 獲取倒數滴答聲
   
   if (timeUpSound) timeUpSound.volume = 1.0;
   if (startSound) startSound.volume = 1.0;
+  if (tickSound) tickSound.volume = 0.5; // 閃動音效音量稍微調低
+  if (countdownTickSound) countdownTickSound.volume = 0.7; // 倒數滴答聲
   
   // 全域解鎖手機音效播放權限機制
   let audioUnlocked = false;
   function unlockAllAudio() {
     if (!audioUnlocked) {
-      const audios = [timeUpSound, startSound];
+      const audios = [timeUpSound, startSound, tickSound, countdownTickSound];
       audios.forEach(a => {
         if (a) {
           a.muted = true; 
@@ -505,6 +506,7 @@
             playPromise.then(() => {
               a.pause();
               a.currentTime = 0;
+              a.muted = false; // 解鎖後取消靜音
             }).catch(e => {});
           }
         }
@@ -513,7 +515,6 @@
     }
   }
 
-  /* */
   /* ================= 抽籤系統邏輯 ================= */
   let availableNumbers = []; 
 
@@ -544,6 +545,12 @@
     const maxJumps = 30; 
     
     const interval = setInterval(() => {
+      // 播放閃動音效
+      if (tickSound) {
+        tickSound.currentTime = 0;
+        tickSound.play().catch(e => console.log("閃動音效阻擋:", e));
+      }
+
       const tempNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
       const directions = ['順時針', '逆時針'];
       const tempDirection = directions[Math.floor(Math.random() * 2)];
@@ -564,6 +571,12 @@
         resultDiv.style.transform = "scale(0.8)";
         
         setTimeout(() => {
+          // 播放最終確認音效
+          if (startSound) {
+            startSound.currentTime = 0;
+            startSound.play().catch(e => console.log("確認音效阻擋:", e));
+          }
+
           resultDiv.innerHTML = `<span class="number">${finalNumber}</span> <span class="direction ${finalColorClass}">${finalDirection}</span>`;
           resultDiv.style.opacity = 1;
           resultDiv.style.transform = "scale(1)";
@@ -576,7 +589,6 @@
     }, 50); 
   }
 
-  /* */
   /* ================= 計時器邏輯 ================= */
   const timeOptions = [60, 90, 120, 150, 180]; 
   let baseTime = timeOptions[1]; 
@@ -656,9 +668,9 @@
     timeUpSound.pause();
     timeUpSound.currentTime = 0;
     if (startSound) { startSound.pause(); startSound.currentTime = 0; }
+    if (countdownTickSound) { countdownTickSound.pause(); countdownTickSound.currentTime = 0; }
   }
 
-  /* */
   function toggleTimer() {
     unlockAllAudio(); 
 
@@ -682,6 +694,14 @@
         timeLeft--;
         updateTimerDisplay();
         
+        // 倒數 10 秒內播放滴答聲
+        if (timeLeft <= 10 && timeLeft > 0) {
+           if(countdownTickSound) {
+               countdownTickSound.currentTime = 0;
+               countdownTickSound.play().catch(e => console.log("倒數滴答音效阻擋:", e));
+           }
+        }
+
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           isRunning = false;
@@ -764,7 +784,6 @@
   updateTimerDisplay();
   updateTimerControls();
 
-  /* */
   /* ================= 紀錄與選擇面板初始化 ================= */
   const recordGrid = document.getElementById('record-grid');
   const selectionGrid = document.getElementById('selection-grid');
