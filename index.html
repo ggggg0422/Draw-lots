@@ -4,347 +4,422 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>發言順序與計時系統</title>
+<!-- 引入更現代的字體 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --accent-color: #f39c12;
+    --accent-dark: #d68910;
+    --danger-color: #e74c3c;
+    --danger-dark: #c0392b;
+    --success-color: #2ecc71;
+    --bg-dark: #1e293b; /* 稍微帶點藍的深灰 */
+    --panel-bg: rgba(30, 41, 59, 0.75); /* 毛玻璃底色 */
+    --text-light: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
   body {
-    font-family: "Microsoft JhengHei", sans-serif;
+    font-family: 'Noto Sans TC', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     margin: 0;
-    /* 背景改為由上至下越來越深的藍色漸層 */
-    background: linear-gradient(to bottom, #cce5ff, #154360);
+    /* 更具現代感的深色漸層背景 */
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     background-attachment: fixed;
+    color: var(--text-light);
   }
+
+  /* --- STREAMING_CHUNK:Styling the main container with glassmorphism --- */
   .container {
-    /* 面板底色改為由上至下越來越深的藍色漸層 */
-    background: linear-gradient(to bottom, #cce5ff, #154360);
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3); /* 加深陰影讓面板浮現 */
+    /* 質感升級：毛玻璃效果 (Glassmorphism) */
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 35px 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
     text-align: center;
-    width: 350px;
+    width: 380px; /* 稍微加寬 */
+    max-width: 90vw; /* 確保在小螢幕上不會溢出 */
   }
   
   /* --- 抽籤系統樣式 --- */
   h2 {
-    color: #154360; /* 標題改為深藍色 */
-    font-size: 32px; /* 字體加大 */
-    font-weight: 900; /* 字體加粗 */
+    color: var(--text-light);
+    font-size: 28px;
+    font-weight: 900;
     margin-top: 0;
-    text-shadow: none; /* 深色字在淺色背景上很清楚，移除陰影 */
-    /* 利用文字外框效果，讓字體突破 900 的極限變得更粗 */
-    -webkit-text-stroke: 1.2px #154360;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
+
+  /* --- STREAMING_CHUNK:Styling the result display area --- */
+  #result-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
   #result {
-    font-size: 40px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin: 20px 0;
-    min-height: 60px;
+    font-size: 45px;
+    font-weight: 900;
+    color: #fff;
+    min-height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* 數字發光效果 */
   }
+
   .direction {
     margin-left: 15px;
+    font-size: 35px;
   }
   .direction-green {
-    color: #27ae60;
+    color: var(--success-color);
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
   }
   .direction-red {
-    color: #e74c3c;
+    color: var(--danger-color);
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
   }
   .number {
-    color: black;
-    font-weight: 900;
-    /* 利用文字外框效果，讓字體突破 900 的極限變得更粗 */
-    -webkit-text-stroke: 2px black;
+    font-family: 'Orbitron', sans-serif; /* 數字使用科技感字體 */
+    letter-spacing: 2px;
   }
+  
   .arrow {
     font-size: 50px;
-    animation: bounce 2s infinite;
+    animation: float 3s ease-in-out infinite;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.5);
   }
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-15px); }
-    60% { transform: translateY(-7px); }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
-  .draw-btn {
-    font-size: 24px;
-    padding: 12px 30px;
+
+  /* --- STREAMING_CHUNK:Styling primary buttons --- */
+  .btn-primary {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 15px 30px;
     cursor: pointer;
     border: none;
-    border-radius: 8px;
-    /* 抽順序按鈕改為深藍色，與開始按鈕一致 */
-    background-color: #1f618d;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
-    transition: background-color 0.2s;
-    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 100%;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
   }
-  .draw-btn:hover { background-color: #154360; }
-  .draw-btn:active { transform: scale(0.98); }
-  .draw-btn:disabled {
-    background-color: #95a5a6;
+  .btn-primary:hover:not(:disabled) { 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+    background: linear-gradient(135deg, #4aa3df, var(--primary-color));
+  }
+  .btn-primary:active:not(:disabled) { 
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(52, 152, 219, 0.4);
+  }
+  .btn-primary:disabled {
+    background: #475569;
+    box-shadow: none;
     cursor: not-allowed;
-    transform: none;
+    color: #94a3b8;
   }
 
   /* --- 設定區塊樣式 --- */
   .settings-details {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     font-size: 14px;
     text-align: left;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
   }
   .settings-details summary {
     cursor: pointer;
     user-select: none;
-    font-weight: bold;
-    padding: 5px 0;
+    font-weight: 700;
+    padding: 8px 0;
     text-align: center;
-    font-size: 16px;
+    font-size: 15px;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    list-style: none; /* 隱藏預設箭頭 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  /* 上方在淺藍色背景上的文字與箭頭 */
-  .top-settings summary {
-    color: #154360; /* 文字與箭頭改為深藍色 */
-    text-shadow: none;
+  /* 自訂展開/收合圖示 */
+  .settings-details summary::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: 8px;
+    transition: transform 0.3s;
+    color: var(--text-muted);
   }
-  /* 下方在深藍色背景上的文字與箭頭 */
-  .bottom-settings summary {
-    color: #fff;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  .settings-details[open] summary::after {
+    transform: rotate(180deg);
   }
   .settings-details[open] summary {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 12px;
   }
 
   /* --- 分隔線 --- */
   .divider {
     border: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.3); /* 分隔線改半透明白 */
-    margin: 25px 0;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 30px 0;
   }
 
+  /* --- STREAMING_CHUNK:Styling the timer section --- */
   /* --- 計時器樣式 --- */
-  .timer-section h2 {
-    font-size: 32px; /* 字體加大與上方一致 */
-    font-weight: 900; /* 字體加粗 */
-    color: #fff; 
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 6px rgba(0,0,0,0.4); /* 同步加上陰影增加質感 */
-    /* 利用文字外框效果，讓字體突破 900 的極限變得更粗 */
-    -webkit-text-stroke: 1.2px #fff;
-  }
   .time-selector {
-    margin: 10px 0;
+    margin: 15px 0;
     padding: 0 10px;
   }
   #time-slider {
     -webkit-appearance: none;
     width: 100%;
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 5px;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
     outline: none;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     transition: opacity 0.2s;
   }
   #time-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    /* 滑桿圓圈改為深藍色 */
-    background: #1f618d;
+    background: var(--primary-color);
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
+    border: 2px solid white;
+    transition: transform 0.1s;
   }
-  #time-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    /* 滑桿圓圈改為深藍色 */
-    background: #1f618d;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    border: none;
+  #time-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
   }
-  #time-slider:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  #time-slider:disabled::-webkit-slider-thumb {
-    cursor: not-allowed;
-  }
+  
   .time-labels {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    color: #ecf0f1; /* 時間標籤改淺色 */
-    padding: 0 2px;
+    color: var(--text-muted); 
+    padding: 0;
     user-select: none;
+    font-weight: 700;
   }
   .time-labels span {
     cursor: pointer;
+    transition: color 0.2s;
   }
+  .time-labels span:hover {
+    color: var(--text-light);
+  }
+
   #timer-display {
-    font-size: 56px;
-    font-weight: bold;
-    font-family: monospace;
-    color: #fff; /* 計時器文字改白 */
-    margin: 10px 0 20px 0;
-    transition: color 0.3s;
+    font-size: 64px;
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
+    color: var(--text-light);
+    margin: 15px 0 25px 0;
+    transition: color 0.3s, text-shadow 0.3s;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
   }
   #timer-display.danger {
-    color: #ff4d4d; /* 警告紅色微調亮一點 */
-    text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+    color: var(--danger-color);
+    text-shadow: 0 0 20px rgba(231, 76, 60, 0.8), 0 4px 10px rgba(0,0,0,0.5);
     animation: pulse 1s infinite;
   }
   @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.08); opacity: 0.8; }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
   }
+  
+  /* --- STREAMING_CHUNK:Styling timer control buttons --- */
   .timer-controls {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
   .timer-controls button {
+    font-family: 'Noto Sans TC', sans-serif;
     font-size: 15px;
-    padding: 10px 0;
-    flex: 1;
+    font-weight: 700;
+    padding: 12px 0;
     cursor: pointer;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     color: white;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
   }
   .timer-controls button:active:not(:disabled) {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
-  /* 開始按鈕改為深藍色 */
-  #start-btn { background-color: #1f618d; }
-  #start-btn:hover { background-color: #154360; }
-  #add-time-30-btn, #add-time-60-btn { background-color: #f39c12; }
-  #add-time-30-btn:hover:not(:disabled), #add-time-60-btn:hover:not(:disabled) { background-color: #d68910; }
-  #add-time-30-btn:disabled, #add-time-60-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-  #reset-btn { background-color: #7f8c8d; }
-  #reset-btn:hover { background-color: #636e72; }
+  
+  #start-btn { 
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); 
+    grid-column: span 2; /* 讓開始按鈕佔滿整行 */
+    font-size: 18px;
+  }
+  #start-btn:hover { filter: brightness(1.1); }
+  
+  .time-add-btn { background: linear-gradient(135deg, var(--accent-color), var(--accent-dark)); }
+  .time-add-btn:hover:not(:disabled) { filter: brightness(1.1); }
+  .time-add-btn:disabled { 
+    background: #475569; 
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed; 
+  }
+  
+  #reset-btn { background: linear-gradient(135deg, #64748b, #475569); }
+  #reset-btn:hover { filter: brightness(1.1); }
 
-  /* --- 紀錄區塊樣式 --- */
+  /* --- STREAMING_CHUNK:Styling the grid items (records and lights) --- */
+  /* --- 紀錄區塊與號碼燈號共用網格樣式 --- */
   .number-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 0 5px;
   }
+
+  /* --- 紀錄區塊樣式 --- */
   .record-item {
-    /* 號碼按鈕底色改為淺藍色 */
-    background-color: #cce5ff;
-    border: 2px solid #bdc3c7;
-    color: #2c3e50;
-    border-radius: 8px;
-    padding: 10px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    border-radius: 10px;
+    padding: 12px 0;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .record-item:hover {
-    border-color: #95a5a6;
-    /* 號碼按鈕滑鼠移過去的顏色同步改為稍微深一點的淺藍色 */
-    background-color: #99c2ff;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
   }
   .record-item.used {
-    background-color: #95a5a6;
-    border-color: #95a5a6;
-    color: white;
-    /* 取消刪除線，並將中文字體稍微縮小以避免破版 */
-    text-decoration: none;
-    font-size: 15px; 
+    background: rgba(231, 76, 60, 0.2); /* 淡淡的紅色背景 */
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    font-family: 'Noto Sans TC', sans-serif; /* 切換回中文字體 */
+    font-size: 14px; 
+    box-shadow: inset 0 0 10px rgba(231, 76, 60, 0.1);
   }
+
   .reset-record-btn {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 8px 20px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
+    font-size: 13px;
+    transition: all 0.2s;
   }
   .reset-record-btn:hover {
-    background-color: #c0392b;
+    background: rgba(255,255,255,0.1);
+    color: var(--text-light);
   }
 
   /* --- 抽籤號碼：暗燈與亮燈樣式 --- */
   .light-item {
-    background-color: rgba(21, 67, 96, 0.5); /* 暗燈底色：深暗藍 */
-    border: 2px solid #34495e;
-    color: #7f8c8d; /* 暗燈文字：暗灰色 */
-    border-radius: 8px;
-    padding: 10px 0;
-    font-size: 18px;
-    font-weight: bold;
+    background: rgba(15, 23, 42, 0.6); /* 更深的暗燈底色 */
+    border: 1px solid rgba(255,255,255,0.05);
+    color: #475569;
+    border-radius: 12px;
+    padding: 15px 0;
+    font-size: 20px;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 彈性動畫 */
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
   }
   .light-item:hover {
-    border-color: #5d6d7e;
-    color: #bdc3c7;
+    border-color: rgba(255,255,255,0.2);
+    color: #94a3b8;
   }
   .light-item.lit {
-    background-color: #fff9db; /* 亮燈底色：暖白微黃 */
-    border-color: #f1c40f; /* 亮燈邊框：亮黃色 */
-    color: #d35400; /* 亮燈文字：深橘色，凸顯對比 */
-    box-shadow: 0 0 12px rgba(241, 196, 15, 0.9), inset 0 0 6px rgba(241, 196, 15, 0.4); /* 發光光暈 */
-    transform: scale(1.03);
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    border-color: #f1c40f;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.6), inset 0 2px 2px rgba(255,255,255,0.5); 
+    transform: scale(1.05);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
+  /* --- STREAMING_CHUNK:Styling quick light controls --- */
   /* --- 全亮燈 / 全關燈 快捷按鈕樣式 --- */
   .light-controls {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
     margin-bottom: 5px;
+    padding: 0 5px;
   }
   .light-ctrl-btn {
     flex: 1;
-    padding: 8px 0;
+    padding: 10px 0;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
     color: white;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .light-ctrl-btn:hover {
+    background: rgba(255,255,255,0.15);
   }
   .light-ctrl-btn:active {
     transform: scale(0.96);
   }
   .all-on-btn {
-    background-color: #f39c12;
-    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.4);
+    color: #f1c40f;
+    border-color: rgba(241, 196, 15, 0.3);
   }
-  .all-on-btn:hover {
-    background-color: #d68910;
-  }
-  .all-off-btn {
-    background-color: #34495e;
-  }
-  .all-off-btn:hover {
-    background-color: #2c3e50;
-  }
+  .all-on-btn:hover { background: rgba(241, 196, 15, 0.1); }
 </style>
 </head>
 <body>
@@ -355,37 +430,43 @@
 <audio id="start-sound" src="彈簧聲.mp3" preload="auto" volume="1.0"></audio>
 
 <div class="container">
-  <h2>🐺 發言順序</h2>
-  <div id="result"><div class="arrow">🔽</div></div>
+  <h2>狼人殺發言助手</h2>
+  
+  <div id="result-container">
+    <div id="result"><div class="arrow">🔽</div></div>
+  </div>
   
   <details class="settings-details top-settings" open>
-    <summary>⚙️ 1號~12號 (點擊亮燈參與)</summary>
-    <div id="selection-grid" class="number-grid"></div>
+    <summary>參與抽籤號碼設定 (點擊亮燈)</summary>
     <div class="light-controls">
       <button type="button" class="light-ctrl-btn all-on-btn" onclick="setAllLights(true)">💡 全亮燈</button>
       <button type="button" class="light-ctrl-btn all-off-btn" onclick="setAllLights(false)">🌑 全關燈</button>
     </div>
+    <div id="selection-grid" class="number-grid"></div>
   </details>
 
-  <button id="drawBtn" class="draw-btn" onclick="startDrawAnimation()">抽順序</button>
+  <button id="drawBtn" class="btn-primary" onclick="startDrawAnimation()">開始抽順序</button>
 
   <hr class="divider">
 
   <div class="timer-section">
-    <h2>⏳ 發言倒數</h2>
+    <h2>發言計時器</h2>
     <div class="time-selector">
-      <input type="range" id="time-slider" min="0" max="2" value="1" step="1">
+      <input type="range" id="time-slider" min="0" max="4" value="1" step="1">
       <div class="time-labels">
         <span onclick="setTimeSlider(0)">1分</span>
-        <span onclick="setTimeSlider(1)">1分半</span>
+        <span onclick="setTimeSlider(1)">1.5分</span>
         <span onclick="setTimeSlider(2)">2分</span>
+        <span onclick="setTimeSlider(3)">2.5分</span>
+        <span onclick="setTimeSlider(4)">3分</span>
       </div>
     </div>
     <div id="timer-display">01:30</div>
+    
     <div class="timer-controls">
       <button id="start-btn" onclick="toggleTimer()">開始</button>
-      <button id="add-time-30-btn" onclick="addTime(30)">+30秒</button>
-      <button id="add-time-60-btn" onclick="addTime(60)">+1分鐘</button>
+      <button id="add-time-30-btn" class="time-add-btn" onclick="addTime(30)">+30秒</button>
+      <button id="add-time-60-btn" class="time-add-btn" onclick="addTime(60)">+1分鐘</button>
       <button id="reset-btn" onclick="resetTimer()">重置</button>
     </div>
   </div>
@@ -394,11 +475,11 @@
 
   <div class="record-section">
     <details class="settings-details bottom-settings">
-      <summary>📝 已加時號碼紀錄</summary>
+      <summary>已加時號碼紀錄板</summary>
       <div id="record-grid" class="number-grid">
       </div>
-      <div style="text-align: center;">
-        <button class="reset-record-btn" onclick="resetRecords()">清空號碼紀錄</button>
+      <div style="text-align: center; margin-top: 10px;">
+        <button class="reset-record-btn" onclick="resetRecords()">清空紀錄</button>
       </div>
     </details>
   </div>
@@ -415,34 +496,30 @@
   if (spinSound) spinSound.volume = 0.2;
   if (startSound) startSound.volume = 1.0;
   
-  // 針對碼表倒數聲的特殊設定：開啟循環，並避開 MP3 天生的前後空白停頓
+  // 針對碼表倒數聲的特殊設定
   if (tickSound) {
     tickSound.volume = 1.0;
     tickSound.loop = true;
     tickSound.addEventListener('timeupdate', function() {
-      // 只要快播到結尾前 0.25 秒，就直接強制跳回開頭的 0.05 秒，形成無縫循環齒輪聲
       if (this.duration && this.currentTime >= this.duration - 0.25) {
         this.currentTime = 0.05; 
       }
     });
   }
 
-  // 新增：全域解鎖手機音效播放權限機制
+  // 全域解鎖手機音效播放權限機制
   let audioUnlocked = false;
   function unlockAllAudio() {
     if (!audioUnlocked) {
-      // 只解鎖「未來 10 秒後才會響起」的音效。
-      // 注意：不能在這裡解鎖 startSound，否則會導致它在點擊開始時發生衝突被靜音！
       const audios = [timeUpSound, tickSound];
       audios.forEach(a => {
         if (a) {
-          a.muted = true; // 使用 muted 靜音才能避開手機系統限制
+          a.muted = true; 
           const playPromise = a.play();
           if (playPromise !== undefined) {
             playPromise.then(() => {
               a.pause();
               a.currentTime = 0;
-              // ⚠️ 關鍵修正：這裡不要解除靜音，讓它維持靜音，等到真的要播的時候再解除！
             }).catch(e => {});
           }
         }
@@ -451,27 +528,36 @@
     }
   }
 
+  /* --- STREAMING_CHUNK:Draw sequence logic --- */
   /* ================= 抽籤系統邏輯 ================= */
-  let availableNumbers = []; // 起始默認都未選取（全暗燈）
+  let availableNumbers = []; 
 
   function startDrawAnimation() {
-    unlockAllAudio(); // 確保抽順序時解鎖音效
+    unlockAllAudio(); 
+
+    const drawBtn = document.getElementById('drawBtn');
 
     if (availableNumbers.length === 0) {
-      alert('請先點選（亮燈）至少一個參與抽順序的號碼！');
+      const originalText = drawBtn.innerText;
+      const originalBg = drawBtn.style.background;
+      drawBtn.innerText = "請先選號!";
+      drawBtn.style.background = "var(--danger-color)";
+      
+      setTimeout(() => {
+        drawBtn.innerText = originalText;
+        drawBtn.style.background = originalBg;
+      }, 1500);
       return;
     }
 
-    // 播放轉盤音效
     spinSound.currentTime = 0;
     spinSound.volume = 0.2;
     spinSound.play().catch(e => console.log("轉盤音效播放被阻擋:", e));
 
     const resultDiv = document.getElementById('result');
-    const drawBtn = document.getElementById('drawBtn');
     
     drawBtn.disabled = true;
-    drawBtn.innerText = "抽順序中";
+    drawBtn.innerText = "抽順序中...";
     
     let jumps = 0;
     const maxJumps = 30; 
@@ -488,8 +574,6 @@
       
       if (jumps >= maxJumps) {
         clearInterval(interval);
-        
-        // 停止轉盤音效
         spinSound.pause();
         
         const finalNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
@@ -497,38 +581,40 @@
         const finalColorClass = finalDirection === '順時針' ? 'direction-green' : 'direction-red';
         
         resultDiv.style.opacity = 0;
+        resultDiv.style.transform = "scale(0.8)";
+        
         setTimeout(() => {
           resultDiv.innerHTML = `<span class="number">${finalNumber}</span> <span class="direction ${finalColorClass}">${finalDirection}</span>`;
           resultDiv.style.opacity = 1;
-          resultDiv.style.transition = "opacity 0.2s ease-in";
+          resultDiv.style.transform = "scale(1)";
+          resultDiv.style.transition = "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
           
           drawBtn.disabled = false;
-          drawBtn.innerText = "抽順序";
-        }, 100);
+          drawBtn.innerText = "開始抽順序";
+        }, 150);
       }
     }, 50); 
   }
 
+  /* --- STREAMING_CHUNK:Timer logic setup --- */
   /* ================= 計時器邏輯 ================= */
-  const timeOptions = [60, 90, 120]; // 1分, 1分半, 2分
-  let baseTime = timeOptions[1]; // 預設 90 秒 (1分30秒)
+  const timeOptions = [60, 90, 120, 150, 180]; 
+  let baseTime = timeOptions[1]; 
   let timeLeft = baseTime; 
   let timerInterval = null;
   let isRunning = false;
-  let hasAddedTime = false; // 追蹤是否加過時
-  let globalAddTimeAmount = 0; // 紀錄本局全局加時長度，0代表尚未選擇
+  let hasAddedTime = false; 
+  let globalAddTimeAmount = 0; 
 
   const timerDisplay = document.getElementById('timer-display');
   const startBtn = document.getElementById('start-btn');
   const timeSlider = document.getElementById('time-slider');
 
-  // 監聽滑桿變動
   timeSlider.addEventListener('input', (e) => {
     baseTime = timeOptions[e.target.value];
     resetTimer();
   });
 
-  // 點擊標籤可以直接跳轉滑桿
   function setTimeSlider(index) {
     if (timeSlider.disabled) return;
     timeSlider.value = index;
@@ -536,7 +622,6 @@
     resetTimer();
   }
 
-  // 更新畫面時間顯示
   function updateTimerDisplay() {
     if (timeLeft <= 0) {
       timerDisplay.innerText = "00:00";
@@ -563,7 +648,6 @@
   let currentPlayCount = 0;
   let audioTimeout = null;
 
-  // 播放音效函數 (控制間隔 1.2 秒雙響)
   function playAudio(times) {
     targetPlayCount = times;
     currentPlayCount = 0;
@@ -573,11 +657,9 @@
       if (currentPlayCount < targetPlayCount) {
         timeUpSound.pause();
         timeUpSound.currentTime = 0;
-        timeUpSound.muted = false; // 真正要播放時才解除靜音
+        timeUpSound.muted = false; 
         timeUpSound.volume = 0.2;
-        timeUpSound.play().catch(error => {
-          console.log("自動播放音效被瀏覽器阻擋:", error);
-        });
+        timeUpSound.play().catch(e => console.log("音效阻擋:", e));
         currentPlayCount++;
 
         if (currentPlayCount < targetPlayCount) {
@@ -585,108 +667,79 @@
         }
       }
     }
-
     playNext();
   }
 
-  // 停止音效函數
   function stopAudio() {
     targetPlayCount = 0;
     clearTimeout(audioTimeout);
     timeUpSound.pause();
     timeUpSound.currentTime = 0;
-    
-    if (tickSound) {
-      tickSound.pause();
-      tickSound.currentTime = 0;
-    }
-    if (startSound) {
-      startSound.pause();
-      startSound.currentTime = 0;
-    }
+    if (tickSound) { tickSound.pause(); tickSound.currentTime = 0; }
+    if (startSound) { startSound.pause(); startSound.currentTime = 0; }
   }
 
-  // 開始或暫停計時
+  /* --- STREAMING_CHUNK:Timer execution and controls --- */
   function toggleTimer() {
-    unlockAllAudio(); // 確保點擊按鈕時獲得手機播放權限
+    unlockAllAudio(); 
 
     if (isRunning) {
-      // 執行中 -> 暫停
       clearInterval(timerInterval);
       startBtn.innerText = "繼續";
-      startBtn.style.backgroundColor = "#2ecc71";
+      startBtn.style.background = "var(--success-color)";
       stopAudio();
     } else {
-      // 暫停中 -> 開始
       if (timeLeft <= 0) return;
-      
       timeSlider.disabled = true;
       
-      // 開始時播放彈簧音效 (已排除干擾，可以直接順暢播放)
       if (startSound) {
         startSound.currentTime = 0;
-        startSound.play().catch(e => console.log("開始音效被阻擋:", e));
+        startSound.play().catch(e => console.log("開始音效阻擋:", e));
       }
 
-      // 如果是在最後 10 秒內按繼續，立刻恢復碼表連續播放
       if (timeLeft <= 10 && timeLeft > 0) {
-        tickSound.muted = false; // 真正要播放時才解除靜音
-        tickSound.play().catch(e => console.log("碼表恢復被阻擋:", e));
+        tickSound.muted = false; 
+        tickSound.play().catch(e => console.log("碼表阻擋:", e));
       }
       
       timerInterval = setInterval(() => {
         timeLeft--;
         updateTimerDisplay();
         
-        // 抵達 10 秒時觸發播放，配合時間軸無縫銜接技術，不會再卡頓
         if (timeLeft === 10) {
-          tickSound.muted = false; // 真正要播放時才解除靜音
+          tickSound.muted = false; 
           tickSound.currentTime = 0;
-          tickSound.play().catch(e => console.log("倒數音效被阻擋:", e));
+          tickSound.play().catch(e => console.log("倒數音效阻擋:", e));
         }
         
-        // 時間到
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           isRunning = false;
           startBtn.innerText = "時間到";
           startBtn.disabled = true;
-          startBtn.style.backgroundColor = "#95a5a6";
+          startBtn.style.background = "#475569";
           
-          // 強制停止並重置碼表倒數聲
-          if (tickSound) {
-            tickSound.pause();
-            tickSound.currentTime = 0;
-          }
-
-          // 延遲 0.5 秒再播放「叮」的音效，確保碼錶聲已完全結束且不重疊
-          setTimeout(() => {
-            playAudio(1);
-          }, 500);
+          if (tickSound) { tickSound.pause(); tickSound.currentTime = 0; }
+          setTimeout(() => { playAudio(1); }, 500);
         }
       }, 1000);
       
       startBtn.innerText = "暫停";
-      startBtn.style.backgroundColor = "#e74c3c";
+      startBtn.style.background = "var(--danger-color)";
     }
     isRunning = !isRunning;
   }
 
-  // 加時功能 (傳入30或60)
   function addTime(amount) {
     if (!hasAddedTime) {
       if (globalAddTimeAmount === 0) {
         globalAddTimeAmount = amount;
       }
-      
       const wasTimeUp = (timeLeft <= 0);
-      
       if (timeLeft < 0) timeLeft = 0;
-      
       timeLeft += globalAddTimeAmount;
       hasAddedTime = true;
       
-      // 如果加時後超過 10 秒，需要暫停正在播放的碼錶聲
       if (timeLeft > 10 && tickSound) {
         tickSound.pause();
         tickSound.currentTime = 0;
@@ -703,53 +756,53 @@
     }
   }
 
-  // 更新計時器按鈕顯示狀態
   function updateTimerControls() {
     const btn30 = document.getElementById('add-time-30-btn');
     const btn60 = document.getElementById('add-time-60-btn');
-    
     if (!btn30 || !btn60) return;
 
     if (globalAddTimeAmount === 30) {
       btn30.style.display = '';
       btn60.style.display = 'none';
+      btn30.style.gridColumn = 'span 2'; // 讓按鈕佔滿寬度
     } else if (globalAddTimeAmount === 60) {
       btn30.style.display = 'none';
       btn60.style.display = '';
+      btn60.style.gridColumn = 'span 2'; // 讓按鈕佔滿寬度
     } else {
       btn30.style.display = '';
       btn60.style.display = '';
+      btn30.style.gridColumn = 'span 1';
+      btn60.style.gridColumn = 'span 1';
     }
     
     btn30.disabled = hasAddedTime;
     btn60.disabled = hasAddedTime;
   }
 
-  // 重置計時器
   function resetTimer() {
     clearInterval(timerInterval);
     isRunning = false;
     timeLeft = baseTime;
     hasAddedTime = false;
-    
     timeSlider.disabled = false;
     
     startBtn.innerText = "開始";
     startBtn.disabled = false;
-    /* 重置時恢復為深藍色 */
-    startBtn.style.backgroundColor = "#1f618d";
+    startBtn.style.background = "linear-gradient(135deg, var(--primary-color), var(--primary-dark))";
     
     updateTimerDisplay();
     updateTimerControls();
     stopAudio();
   }
 
-  // 網頁載入時初始化顯示時間與按鈕狀態
   updateTimerDisplay();
   updateTimerControls();
 
-  /* ================= 已加時紀錄邏輯 ================= */
+  /* --- STREAMING_CHUNK:Grid initialization logic --- */
+  /* ================= 紀錄與選擇面板初始化 ================= */
   const recordGrid = document.getElementById('record-grid');
+  const selectionGrid = document.getElementById('selection-grid');
 
   function initRecordGrid() {
     recordGrid.innerHTML = '';
@@ -759,12 +812,7 @@
       btn.innerText = i;
       btn.onclick = () => {
         btn.classList.toggle('used');
-        // 加入判斷：如果有 .used class 就顯示已加時，否則恢復原本數字
-        if (btn.classList.contains('used')) {
-          btn.innerText = "已加時";
-        } else {
-          btn.innerText = i;
-        }
+        btn.innerText = btn.classList.contains('used') ? "已加" : i;
       };
       recordGrid.appendChild(btn);
     }
@@ -774,32 +822,25 @@
     const items = recordGrid.querySelectorAll('.record-item');
     items.forEach((item, index) => {
       item.classList.remove('used');
-      // 清空紀錄時，把按鈕文字變回對應的號碼 (index + 1)
       item.innerText = index + 1;
     });
-    
     globalAddTimeAmount = 0;
     updateTimerControls();
   }
-
-  /* ================= 參與號碼設定面板（亮燈/暗燈） ================= */
-  const selectionGrid = document.getElementById('selection-grid');
   
   function initSelectionGrid() {
     selectionGrid.innerHTML = '';
     for (let i = 1; i <= 12; i++) {
       const btn = document.createElement('div');
-      btn.className = 'light-item'; // 預設套用暗燈樣式
+      btn.className = 'light-item'; 
       btn.innerText = i;
       
       btn.onclick = () => {
         const index = availableNumbers.indexOf(i);
         if (index === -1) {
-          // 原本未選取 -> 點擊後亮燈並加入抽籤池
           availableNumbers.push(i);
           btn.classList.add('lit');
         } else {
-          // 原本已選取 -> 點擊後關燈並移出抽籤池
           availableNumbers.splice(index, 1);
           btn.classList.remove('lit');
         }
@@ -809,7 +850,6 @@
     }
   }
 
-  // 全亮燈 / 全關燈 快捷功能
   function setAllLights(turnOn) {
     const items = selectionGrid.querySelectorAll('.light-item');
     if (turnOn) {
