@@ -99,14 +99,16 @@
     letter-spacing: 2px;
   }
   
-  .arrow {
-    font-size: 50px;
-    animation: float 3s ease-in-out infinite;
-    text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  .waiting-text {
+    font-size: 24px;
+    color: var(--text-muted);
+    letter-spacing: 4px;
+    font-weight: 700;
+    animation: pulse-opacity 2s infinite ease-in-out;
   }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+  @keyframes pulse-opacity {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
   }
 
   /* --- STREAMING_CHUNK:Styling primary buttons --- */
@@ -285,8 +287,6 @@
   
   #start-btn { 
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); 
-    grid-column: span 2; /* 讓開始按鈕佔滿整行 */
-    font-size: 18px;
   }
   #start-btn:hover { filter: brightness(1.1); }
   
@@ -424,16 +424,17 @@
 </head>
 <body>
 
-<audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="0.2"></audio>
+<!-- 更新為高質感的線上音效 -->
+<audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="1.0"></audio>
 <audio id="spin-sound" src="https://assets.mixkit.co/active_storage/sfx/1932/1932-preview.mp3" preload="auto" volume="0.2"></audio>
-<audio id="tick-sound" src="碼表倒數聲.mp3" preload="auto" volume="1.0"></audio>
-<audio id="start-sound" src="彈簧聲.mp3" preload="auto" volume="1.0"></audio>
+<audio id="tick-sound" src="https://assets.mixkit.co/active_storage/sfx/1046/1046-preview.mp3" preload="auto" volume="0.3"></audio>
+<audio id="start-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto" volume="1.0"></audio>
 
 <div class="container">
-  <h2>狼人殺發言助手</h2>
+  <h2>抽發言順序</h2>
   
   <div id="result-container">
-    <div id="result"><div class="arrow">🔽</div></div>
+    <div id="result"><div class="waiting-text">等待抽籤</div></div>
   </div>
   
   <details class="settings-details top-settings" open>
@@ -465,9 +466,9 @@
     
     <div class="timer-controls">
       <button id="start-btn" onclick="toggleTimer()">開始</button>
+      <button id="reset-btn" onclick="resetTimer()">重置</button>
       <button id="add-time-30-btn" class="time-add-btn" onclick="addTime(30)">+30秒</button>
       <button id="add-time-60-btn" class="time-add-btn" onclick="addTime(60)">+1分鐘</button>
-      <button id="reset-btn" onclick="resetTimer()">重置</button>
     </div>
   </div>
 
@@ -492,21 +493,11 @@
   const tickSound = document.getElementById('tick-sound');
   const startSound = document.getElementById('start-sound');
   
-  if (timeUpSound) timeUpSound.volume = 0.2;
+  if (timeUpSound) timeUpSound.volume = 1.0;
   if (spinSound) spinSound.volume = 0.2;
   if (startSound) startSound.volume = 1.0;
+  if (tickSound) tickSound.volume = 0.3;
   
-  // 針對碼表倒數聲的特殊設定
-  if (tickSound) {
-    tickSound.volume = 1.0;
-    tickSound.loop = true;
-    tickSound.addEventListener('timeupdate', function() {
-      if (this.duration && this.currentTime >= this.duration - 0.25) {
-        this.currentTime = 0.05; 
-      }
-    });
-  }
-
   // 全域解鎖手機音效播放權限機制
   let audioUnlocked = false;
   function unlockAllAudio() {
@@ -658,7 +649,7 @@
         timeUpSound.pause();
         timeUpSound.currentTime = 0;
         timeUpSound.muted = false; 
-        timeUpSound.volume = 0.2;
+        timeUpSound.volume = 1.0; // 調整時間到音效的音量為最高
         timeUpSound.play().catch(e => console.log("音效阻擋:", e));
         currentPlayCount++;
 
@@ -692,13 +683,17 @@
       if (timeLeft <= 0) return;
       timeSlider.disabled = true;
       
+      // 播放「開始/繼續」音效
       if (startSound) {
+        startSound.muted = false;
         startSound.currentTime = 0;
         startSound.play().catch(e => console.log("開始音效阻擋:", e));
       }
 
+      // 如果剛好在最後 10 秒內點擊開始，先響一聲倒數音效
       if (timeLeft <= 10 && timeLeft > 0) {
-        tickSound.muted = false; 
+        tickSound.muted = false;
+        tickSound.currentTime = 0;
         tickSound.play().catch(e => console.log("碼表阻擋:", e));
       }
       
@@ -706,9 +701,10 @@
         timeLeft--;
         updateTimerDisplay();
         
-        if (timeLeft === 10) {
+        // 剩下 10 秒開始，每一秒發出精準的「嗶」聲
+        if (timeLeft <= 10 && timeLeft > 0) {
           tickSound.muted = false; 
-          tickSound.currentTime = 0;
+          tickSound.currentTime = 0; // 重置音軌確保每次都能順利觸發
           tickSound.play().catch(e => console.log("倒數音效阻擋:", e));
         }
         
@@ -720,7 +716,8 @@
           startBtn.style.background = "#475569";
           
           if (tickSound) { tickSound.pause(); tickSound.currentTime = 0; }
-          setTimeout(() => { playAudio(1); }, 500);
+          // 稍微縮短延遲，讓「時間到」的提示更即時
+          setTimeout(() => { playAudio(1); }, 100);
         }
       }, 1000);
       
