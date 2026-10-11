@@ -35,7 +35,7 @@
     color: var(--text-light);
   }
 
-  /* --- STREAMING_CHUNK:Styling the main container with glassmorphism --- */
+  /* */
   .container {
     /* 質感升級：毛玻璃效果 (Glassmorphism) */
     background: var(--panel-bg);
@@ -61,7 +61,7 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
 
-  /* --- STREAMING_CHUNK:Styling the result display area --- */
+  /* */
   #result-container {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 15px;
@@ -111,7 +111,7 @@
     50% { opacity: 1; }
   }
 
-  /* --- STREAMING_CHUNK:Styling primary buttons --- */
+  /* */
   .btn-primary {
     font-family: 'Noto Sans TC', sans-serif;
     font-size: 20px;
@@ -194,7 +194,7 @@
     margin: 30px 0;
   }
 
-  /* --- STREAMING_CHUNK:Styling the timer section --- */
+  /* */
   /* --- 計時器樣式 --- */
   .time-selector {
     margin: 15px 0;
@@ -263,7 +263,7 @@
     50% { transform: scale(1.05); }
   }
   
-  /* --- STREAMING_CHUNK:Styling timer control buttons --- */
+  /* */
   .timer-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -302,7 +302,7 @@
   #reset-btn { background: linear-gradient(135deg, #64748b, #475569); }
   #reset-btn:hover { filter: brightness(1.1); }
 
-  /* --- STREAMING_CHUNK:Styling the grid items (records and lights) --- */
+  /* */
   /* --- 紀錄區塊與號碼燈號共用網格樣式 --- */
   .number-grid {
     display: grid;
@@ -387,7 +387,7 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* --- STREAMING_CHUNK:Styling quick light controls --- */
+  /* */
   /* --- 全亮燈 / 全關燈 快捷按鈕樣式 --- */
   .light-controls {
     display: flex;
@@ -424,10 +424,8 @@
 </head>
 <body>
 
-<!-- 更新為高質感的線上音效 -->
+<!-- 更新為高質感的線上音效 (已移除彈簧聲與碼表聲) -->
 <audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="1.0"></audio>
-<audio id="spin-sound" src="https://assets.mixkit.co/active_storage/sfx/1932/1932-preview.mp3" preload="auto" volume="0.2"></audio>
-<audio id="tick-sound" src="https://assets.mixkit.co/active_storage/sfx/1046/1046-preview.mp3" preload="auto" volume="0.3"></audio>
 <audio id="start-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto" volume="1.0"></audio>
 
 <div class="container">
@@ -489,20 +487,16 @@
 <script>
   // 強制所有音效在載入時音量達到設定值
   const timeUpSound = document.getElementById('time-up-sound');
-  const spinSound = document.getElementById('spin-sound');
-  const tickSound = document.getElementById('tick-sound');
   const startSound = document.getElementById('start-sound');
   
   if (timeUpSound) timeUpSound.volume = 1.0;
-  if (spinSound) spinSound.volume = 0.2;
   if (startSound) startSound.volume = 1.0;
-  if (tickSound) tickSound.volume = 0.3;
   
   // 全域解鎖手機音效播放權限機制
   let audioUnlocked = false;
   function unlockAllAudio() {
     if (!audioUnlocked) {
-      const audios = [timeUpSound, tickSound];
+      const audios = [timeUpSound, startSound];
       audios.forEach(a => {
         if (a) {
           a.muted = true; 
@@ -519,7 +513,7 @@
     }
   }
 
-  /* --- STREAMING_CHUNK:Draw sequence logic --- */
+  /* */
   /* ================= 抽籤系統邏輯 ================= */
   let availableNumbers = []; 
 
@@ -541,10 +535,6 @@
       return;
     }
 
-    spinSound.currentTime = 0;
-    spinSound.volume = 0.2;
-    spinSound.play().catch(e => console.log("轉盤音效播放被阻擋:", e));
-
     const resultDiv = document.getElementById('result');
     
     drawBtn.disabled = true;
@@ -565,7 +555,6 @@
       
       if (jumps >= maxJumps) {
         clearInterval(interval);
-        spinSound.pause();
         
         const finalNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
         const finalDirection = directions[Math.floor(Math.random() * 2)];
@@ -587,7 +576,7 @@
     }, 50); 
   }
 
-  /* --- STREAMING_CHUNK:Timer logic setup --- */
+  /* */
   /* ================= 計時器邏輯 ================= */
   const timeOptions = [60, 90, 120, 150, 180]; 
   let baseTime = timeOptions[1]; 
@@ -666,11 +655,10 @@
     clearTimeout(audioTimeout);
     timeUpSound.pause();
     timeUpSound.currentTime = 0;
-    if (tickSound) { tickSound.pause(); tickSound.currentTime = 0; }
     if (startSound) { startSound.pause(); startSound.currentTime = 0; }
   }
 
-  /* --- STREAMING_CHUNK:Timer execution and controls --- */
+  /* */
   function toggleTimer() {
     unlockAllAudio(); 
 
@@ -689,24 +677,10 @@
         startSound.currentTime = 0;
         startSound.play().catch(e => console.log("開始音效阻擋:", e));
       }
-
-      // 如果剛好在最後 10 秒內點擊開始，先響一聲倒數音效
-      if (timeLeft <= 10 && timeLeft > 0) {
-        tickSound.muted = false;
-        tickSound.currentTime = 0;
-        tickSound.play().catch(e => console.log("碼表阻擋:", e));
-      }
       
       timerInterval = setInterval(() => {
         timeLeft--;
         updateTimerDisplay();
-        
-        // 剩下 10 秒開始，每一秒發出精準的「嗶」聲
-        if (timeLeft <= 10 && timeLeft > 0) {
-          tickSound.muted = false; 
-          tickSound.currentTime = 0; // 重置音軌確保每次都能順利觸發
-          tickSound.play().catch(e => console.log("倒數音效阻擋:", e));
-        }
         
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
@@ -715,7 +689,6 @@
           startBtn.disabled = true;
           startBtn.style.background = "#475569";
           
-          if (tickSound) { tickSound.pause(); tickSound.currentTime = 0; }
           // 稍微縮短延遲，讓「時間到」的提示更即時
           setTimeout(() => { playAudio(1); }, 100);
         }
@@ -736,11 +709,6 @@
       if (timeLeft < 0) timeLeft = 0;
       timeLeft += globalAddTimeAmount;
       hasAddedTime = true;
-      
-      if (timeLeft > 10 && tickSound) {
-        tickSound.pause();
-        tickSound.currentTime = 0;
-      }
 
       updateTimerDisplay();
       updateTimerControls();
@@ -796,7 +764,7 @@
   updateTimerDisplay();
   updateTimerControls();
 
-  /* --- STREAMING_CHUNK:Grid initialization logic --- */
+  /* */
   /* ================= 紀錄與選擇面板初始化 ================= */
   const recordGrid = document.getElementById('record-grid');
   const selectionGrid = document.getElementById('selection-grid');
