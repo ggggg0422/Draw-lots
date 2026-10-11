@@ -15,8 +15,8 @@
     --danger-color: #e74c3c;
     --danger-dark: #c0392b;
     --success-color: #2ecc71;
-    --bg-dark: #1e293b; /* 稍微帶點藍的深灰 */
-    --panel-bg: rgba(30, 41, 59, 0.75); /* 毛玻璃底色 */
+    --bg-dark: #1e293b; 
+    --panel-bg: rgba(30, 41, 59, 0.75); 
     --text-light: #f8fafc;
     --text-muted: #94a3b8;
   }
@@ -29,14 +29,12 @@
     justify-content: center;
     min-height: 100vh;
     margin: 0;
-    /* 更具現代感的深色漸層背景 */
     background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     background-attachment: fixed;
     color: var(--text-light);
   }
 
   .container {
-    /* 質感升級：毛玻璃效果 (Glassmorphism) */
     background: var(--panel-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -45,11 +43,10 @@
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
     text-align: center;
-    width: 380px; /* 稍微加寬 */
-    max-width: 90vw; /* 確保在小螢幕上不會溢出 */
+    width: 380px; 
+    max-width: 90vw; 
   }
   
-  /* --- 抽籤系統樣式 --- */
   h2 {
     color: var(--text-light);
     font-size: 28px;
@@ -77,7 +74,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* 數字發光效果 */
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    /* 加入硬體加速提示，改善手機端頻繁更動文字時的卡頓 */
+    will-change: contents, transform;
+    transform: translateZ(0);
   }
 
   .direction {
@@ -93,7 +93,7 @@
     text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
   }
   .number {
-    font-family: 'Orbitron', sans-serif; /* 數字使用科技感字體 */
+    font-family: 'Orbitron', sans-serif; 
     letter-spacing: 2px;
   }
   
@@ -142,7 +142,6 @@
     color: #94a3b8;
   }
 
-  /* --- 設定區塊樣式 --- */
   .settings-details {
     margin-bottom: 20px;
     font-size: 14px;
@@ -161,12 +160,11 @@
     font-size: 15px;
     color: var(--text-light);
     letter-spacing: 1px;
-    list-style: none; /* 隱藏預設箭頭 */
+    list-style: none;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  /* 自訂展開/收合圖示 */
   .settings-details summary::after {
     content: '▼';
     font-size: 10px;
@@ -183,7 +181,6 @@
     padding-bottom: 12px;
   }
 
-  /* --- 分隔線 --- */
   .divider {
     border: 0;
     height: 1px;
@@ -191,7 +188,6 @@
     margin: 30px 0;
   }
 
-  /* --- 計時器樣式 --- */
   .time-selector {
     margin: 15px 0;
     padding: 0 10px;
@@ -280,24 +276,16 @@
     transform: scale(0.96);
   }
   
-  #start-btn { 
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); 
-  }
+  #start-btn { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
   #start-btn:hover { filter: brightness(1.1); }
   
   .time-add-btn { background: linear-gradient(135deg, var(--accent-color), var(--accent-dark)); }
   .time-add-btn:hover:not(:disabled) { filter: brightness(1.1); }
-  .time-add-btn:disabled { 
-    background: #475569; 
-    color: #94a3b8;
-    box-shadow: none;
-    cursor: not-allowed; 
-  }
+  .time-add-btn:disabled { background: #475569; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
   
   #reset-btn { background: linear-gradient(135deg, #64748b, #475569); }
   #reset-btn:hover { filter: brightness(1.1); }
 
-  /* --- 紀錄區塊與號碼燈號共用網格樣式 --- */
   .number-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -306,7 +294,6 @@
     padding: 0 5px;
   }
 
-  /* --- 紀錄區塊樣式 --- */
   .record-item {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -322,15 +309,12 @@
     align-items: center;
     justify-content: center;
   }
-  .record-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-light);
-  }
+  .record-item:hover { background: rgba(255, 255, 255, 0.1); color: var(--text-light); }
   .record-item.used {
-    background: rgba(231, 76, 60, 0.2); /* 淡淡的紅色背景 */
+    background: rgba(231, 76, 60, 0.2);
     border-color: var(--danger-color);
     color: var(--danger-color);
-    font-family: 'Noto Sans TC', sans-serif; /* 切換回中文字體 */
+    font-family: 'Noto Sans TC', sans-serif;
     font-size: 14px; 
     box-shadow: inset 0 0 10px rgba(231, 76, 60, 0.1);
   }
@@ -345,14 +329,10 @@
     font-size: 13px;
     transition: all 0.2s;
   }
-  .reset-record-btn:hover {
-    background: rgba(255,255,255,0.1);
-    color: var(--text-light);
-  }
+  .reset-record-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-light); }
 
-  /* --- 抽籤號碼：暗燈與亮燈樣式 --- */
   .light-item {
-    background: rgba(15, 23, 42, 0.6); /* 更深的暗燈底色 */
+    background: rgba(15, 23, 42, 0.6); 
     border: 1px solid rgba(255,255,255,0.05);
     color: #475569;
     border-radius: 12px;
@@ -361,17 +341,14 @@
     font-weight: 900;
     font-family: 'Orbitron', sans-serif;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 彈性動畫 */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
   }
-  .light-item:hover {
-    border-color: rgba(255,255,255,0.2);
-    color: #94a3b8;
-  }
+  .light-item:hover { border-color: rgba(255,255,255,0.2); color: #94a3b8; }
   .light-item.lit {
     background: linear-gradient(135deg, #f1c40f, #f39c12);
     border-color: #f1c40f;
@@ -381,7 +358,6 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* --- 全亮燈 / 全關燈 快捷按鈕樣式 --- */
   .light-controls {
     display: flex;
     gap: 12px;
@@ -402,27 +378,18 @@
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
   }
-  .light-ctrl-btn:hover {
-    background: rgba(255,255,255,0.15);
-  }
-  .light-ctrl-btn:active {
-    transform: scale(0.96);
-  }
-  .all-on-btn {
-    color: #f1c40f;
-    border-color: rgba(241, 196, 15, 0.3);
-  }
+  .light-ctrl-btn:hover { background: rgba(255,255,255,0.15); }
+  .light-ctrl-btn:active { transform: scale(0.96); }
+  .all-on-btn { color: #f1c40f; border-color: rgba(241, 196, 15, 0.3); }
   .all-on-btn:hover { background: rgba(241, 196, 15, 0.1); }
 </style>
 </head>
 <body>
 
-<!-- 更新為高質感的線上音效 (已移除彈簧聲與碼表聲) -->
+<!-- 音效元件 -->
 <audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="1.0"></audio>
 <audio id="start-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto" volume="1.0"></audio>
-<!-- 新增抽籤閃動音效 -->
 <audio id="tick-sound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto" volume="0.5"></audio>
-<!-- 新增倒數十秒滴答聲 -->
 <audio id="countdown-tick-sound" src="https://assets.mixkit.co/active_storage/sfx/2533/2533-preview.mp3" preload="auto" volume="0.7"></audio>
 
 <div class="container">
@@ -472,8 +439,7 @@
   <div class="record-section">
     <details class="settings-details bottom-settings">
       <summary>已加時號碼紀錄板</summary>
-      <div id="record-grid" class="number-grid">
-      </div>
+      <div id="record-grid" class="number-grid"></div>
       <div style="text-align: center; margin-top: 10px;">
         <button class="reset-record-btn" onclick="resetRecords()">清空紀錄</button>
       </div>
@@ -482,18 +448,16 @@
 </div>
 
 <script>
-  // 強制所有音效在載入時音量達到設定值
   const timeUpSound = document.getElementById('time-up-sound');
   const startSound = document.getElementById('start-sound');
-  const tickSound = document.getElementById('tick-sound'); // 獲取閃動音效
-  const countdownTickSound = document.getElementById('countdown-tick-sound'); // 獲取倒數滴答聲
+  const tickSound = document.getElementById('tick-sound'); 
+  const countdownTickSound = document.getElementById('countdown-tick-sound'); 
   
   if (timeUpSound) timeUpSound.volume = 1.0;
   if (startSound) startSound.volume = 1.0;
-  if (tickSound) tickSound.volume = 0.5; // 閃動音效音量稍微調低
-  if (countdownTickSound) countdownTickSound.volume = 0.7; // 倒數滴答聲
+  if (tickSound) tickSound.volume = 0.5; 
+  if (countdownTickSound) countdownTickSound.volume = 0.7; 
   
-  // 全域解鎖手機音效播放權限機制
   let audioUnlocked = false;
   function unlockAllAudio() {
     if (!audioUnlocked) {
@@ -506,8 +470,10 @@
             playPromise.then(() => {
               a.pause();
               a.currentTime = 0;
-              a.muted = false; // 解鎖後取消靜音
-            }).catch(e => {});
+              a.muted = false; 
+            }).catch(e => {
+              a.muted = false; // 即使解鎖失敗也復原靜音設定
+            });
           }
         }
       });
@@ -515,7 +481,6 @@
     }
   }
 
-  /* ================= 抽籤系統邏輯 ================= */
   let availableNumbers = []; 
 
   function startDrawAnimation() {
@@ -542,13 +507,20 @@
     drawBtn.innerText = "抽順序中...";
     
     let jumps = 0;
-    const maxJumps = 30; 
+    // 優化：減少手機端重繪次數，從 30 降至 15 次
+    const maxJumps = 15; 
+    // 優化：放慢時間間隔，從 50ms 放慢至 90ms，減輕手機運算負擔
+    const intervalDelay = 90; 
     
     const interval = setInterval(() => {
-      // 播放閃動音效
+      // 優化音效播放邏輯：避免在短時間內不斷觸發 currentTime = 0 導致卡頓
       if (tickSound) {
-        tickSound.currentTime = 0;
-        tickSound.play().catch(e => console.log("閃動音效阻擋:", e));
+        try {
+          if (tickSound.paused || tickSound.currentTime > 0.05) {
+            tickSound.currentTime = 0;
+          }
+          tickSound.play().catch(e => {});
+        } catch(e) {}
       }
 
       const tempNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
@@ -568,28 +540,26 @@
         const finalColorClass = finalDirection === '順時針' ? 'direction-green' : 'direction-red';
         
         resultDiv.style.opacity = 0;
-        resultDiv.style.transform = "scale(0.8)";
+        resultDiv.style.transform = "scale(0.8) translateZ(0)";
         
         setTimeout(() => {
-          // 播放最終確認音效
           if (startSound) {
             startSound.currentTime = 0;
-            startSound.play().catch(e => console.log("確認音效阻擋:", e));
+            startSound.play().catch(e => {});
           }
 
           resultDiv.innerHTML = `<span class="number">${finalNumber}</span> <span class="direction ${finalColorClass}">${finalDirection}</span>`;
           resultDiv.style.opacity = 1;
-          resultDiv.style.transform = "scale(1)";
+          resultDiv.style.transform = "scale(1) translateZ(0)";
           resultDiv.style.transition = "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
           
           drawBtn.disabled = false;
           drawBtn.innerText = "開始抽順序";
         }, 150);
       }
-    }, 50); 
+    }, intervalDelay); 
   }
 
-  /* ================= 計時器邏輯 ================= */
   const timeOptions = [60, 90, 120, 150, 180]; 
   let baseTime = timeOptions[1]; 
   let timeLeft = baseTime; 
@@ -650,8 +620,8 @@
         timeUpSound.pause();
         timeUpSound.currentTime = 0;
         timeUpSound.muted = false; 
-        timeUpSound.volume = 1.0; // 調整時間到音效的音量為最高
-        timeUpSound.play().catch(e => console.log("音效阻擋:", e));
+        timeUpSound.volume = 1.0; 
+        timeUpSound.play().catch(e => {});
         currentPlayCount++;
 
         if (currentPlayCount < targetPlayCount) {
@@ -683,22 +653,20 @@
       if (timeLeft <= 0) return;
       timeSlider.disabled = true;
       
-      // 播放「開始/繼續」音效
       if (startSound) {
         startSound.muted = false;
         startSound.currentTime = 0;
-        startSound.play().catch(e => console.log("開始音效阻擋:", e));
+        startSound.play().catch(e => {});
       }
       
       timerInterval = setInterval(() => {
         timeLeft--;
         updateTimerDisplay();
         
-        // 倒數 10 秒內播放滴答聲
         if (timeLeft <= 10 && timeLeft > 0) {
            if(countdownTickSound) {
                countdownTickSound.currentTime = 0;
-               countdownTickSound.play().catch(e => console.log("倒數滴答音效阻擋:", e));
+               countdownTickSound.play().catch(e => {});
            }
         }
 
@@ -709,7 +677,6 @@
           startBtn.disabled = true;
           startBtn.style.background = "#475569";
           
-          // 稍微縮短延遲，讓「時間到」的提示更即時
           setTimeout(() => { playAudio(1); }, 100);
         }
       }, 1000);
@@ -749,11 +716,11 @@
     if (globalAddTimeAmount === 30) {
       btn30.style.display = '';
       btn60.style.display = 'none';
-      btn30.style.gridColumn = 'span 2'; // 讓按鈕佔滿寬度
+      btn30.style.gridColumn = 'span 2'; 
     } else if (globalAddTimeAmount === 60) {
       btn30.style.display = 'none';
       btn60.style.display = '';
-      btn60.style.gridColumn = 'span 2'; // 讓按鈕佔滿寬度
+      btn60.style.gridColumn = 'span 2'; 
     } else {
       btn30.style.display = '';
       btn60.style.display = '';
@@ -784,7 +751,6 @@
   updateTimerDisplay();
   updateTimerControls();
 
-  /* ================= 紀錄與選擇面板初始化 ================= */
   const recordGrid = document.getElementById('record-grid');
   const selectionGrid = document.getElementById('selection-grid');
 
