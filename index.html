@@ -384,12 +384,10 @@
   .all-on-btn:hover { background: rgba(241, 196, 15, 0.1); }
 </style>
 </head>
-<body>
-
-<!-- 音效元件 -->
+<!-- 更新為高質感的線上音效 (已移除彈簧聲與碼表聲) -->
 <audio id="time-up-sound" src="https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" preload="auto" volume="1.0"></audio>
 <audio id="start-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto" volume="1.0"></audio>
-<audio id="tick-sound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto" volume="0.5"></audio>
+<!-- 新增倒數十秒滴答聲 -->
 <audio id="countdown-tick-sound" src="https://assets.mixkit.co/active_storage/sfx/2533/2533-preview.mp3" preload="auto" volume="0.7"></audio>
 
 <div class="container">
@@ -447,21 +445,19 @@
   </div>
 </div>
 
-<script>
+  <script>
   const timeUpSound = document.getElementById('time-up-sound');
   const startSound = document.getElementById('start-sound');
-  const tickSound = document.getElementById('tick-sound'); 
   const countdownTickSound = document.getElementById('countdown-tick-sound'); 
   
   if (timeUpSound) timeUpSound.volume = 1.0;
   if (startSound) startSound.volume = 1.0;
-  if (tickSound) tickSound.volume = 0.5; 
   if (countdownTickSound) countdownTickSound.volume = 0.7; 
   
   let audioUnlocked = false;
   function unlockAllAudio() {
     if (!audioUnlocked) {
-      const audios = [timeUpSound, startSound, tickSound, countdownTickSound];
+      const audios = [timeUpSound, startSound, countdownTickSound];
       audios.forEach(a => {
         if (a) {
           a.muted = true; 
@@ -513,16 +509,6 @@
     const intervalDelay = 90; 
     
     const interval = setInterval(() => {
-      // 優化音效播放邏輯：避免在短時間內不斷觸發 currentTime = 0 導致卡頓
-      if (tickSound) {
-        try {
-          if (tickSound.paused || tickSound.currentTime > 0.05) {
-            tickSound.currentTime = 0;
-          }
-          tickSound.play().catch(e => {});
-        } catch(e) {}
-      }
-
       const tempNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
       const directions = ['順時針', '逆時針'];
       const tempDirection = directions[Math.floor(Math.random() * 2)];
